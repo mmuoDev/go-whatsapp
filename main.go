@@ -5,8 +5,9 @@ import (
 	"net/http"
 
 	dialogflow "github.com/mmuoDev/go-whatsapp/dialogflow"
-	"github.com/mmuoDev/go-whatsapp/listen"
-	"github.com/mmuoDev/go-whatsapp/twilio"
+	//"github.com/mmuoDev/go-whatsapp/listen"
+	"github.com/mmuoDev/go-whatsapp/nlp"
+	//"github.com/mmuoDev/go-whatsapp/twilio"
 )
 
 func BotHandler(w http.ResponseWriter, r *http.Request) {
@@ -18,12 +19,22 @@ func BotHandler(w http.ResponseWriter, r *http.Request) {
 	//twilioConnector := twilio.NewConnector(sendTo, client.Api, r)
 
 	//listen
-	data := twilio.NewConnector(r)
-	serviceMgr := listen.NewListener(r, data)
-	//check := serviceMgr.Text("hello")
-	check, _ := serviceMgr.Location()
-	log.Println("here", check)
+	// data := twilio.NewConnector(r)
+	// serviceMgr := listen.NewListener(r, data)
+	// check, _ := serviceMgr.Location()
+	// log.Println("here", check)
 
+	//detect intent 
+	conn, err := dialogflow.NewConnector("weatherapp-aodc", "default", "dialogflow-creds.json", "europe-west2")
+	if err != nil {
+		log.Fatal(err)
+	}
+	nlpService := nlp.NewService(conn)
+	events, err := nlpService.DetectIntent("what is the weather in jos", "en")
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Fatal("res", events)
 	// serviceMgr := messaging.NewService(twilioConnector)
 	// if 2 == 3 {
 	// 	err := serviceMgr.SendText("hello there")
@@ -40,17 +51,17 @@ func BotHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	// http.HandleFunc("/webhook", BotHandler)
+	http.HandleFunc("/webhook", BotHandler)
 
-	// http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", nil)
 
-	conn, err := dialogflow.NewConnector("weatherapp-aodc", "default", "dialogflow-creds.json", "europe-west2")
-	if err != nil {
-		log.Fatal(err)
-	}
-	text, err := conn.DetectIntentText("what is the weather in jos", "en")
-	if err != nil {
-		log.Fatal("error", err)
-	}
-	log.Fatal(text)
+	// conn, err := dialogflow.NewConnector("weatherapp-aodc", "default", "dialogflow-creds.json", "europe-west2")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// text, err := conn.DetectIntentText("what is the weather in jos", "en")
+	// if err != nil {
+	// 	log.Fatal("error", err)
+	// }
+	// log.Fatal(text)
 }

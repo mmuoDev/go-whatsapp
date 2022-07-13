@@ -11,6 +11,8 @@ type Listener interface {
 	// Intent(interface{}) (interface{}, error)
 	Attachments() (bool, events.Attachment) //image,video,documents,contacts
 	Location() (bool, events.Location)
+	GetText() string 
+
 }
 
 type Listen struct {
@@ -23,6 +25,10 @@ func NewListener(r *http.Request, listener Listener) *Listen {
 		payload: r,
 		listen:  listener,
 	}
+}
+
+func (l *Listen) GetText() string {
+	return l.listen.GetText()
 }
 
 func (l *Listen) Text(msg string) bool {

@@ -34,11 +34,15 @@ func NewConnector(payload *http.Request) *Connector {
 	}
 }
 
-func (c *Connector) Text(msg string) bool {
+func (c *Connector) GetText() string {
 	defer c.Payload.Body.Close()
 	c.Payload.ParseForm()
 	data := c.Payload.Form
-	received := data["Body"][0]
+	return data["Body"][0]
+}
+
+func (c *Connector) Text(msg string) bool {
+	received := c.GetText()
 	return strings.EqualFold(received, msg)
 }
 

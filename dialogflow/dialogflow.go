@@ -40,6 +40,7 @@ func NewConnector(projectID, sessionID, credsPath, region string) (*Connector, e
 }
 
 func (c *Connector) DetectIntentText(text, languageCode string) (events.DetectIntent, error) {
+	defer c.client.Close()
 	if c.projectID == "" || c.sessionID == "" {
 		return events.DetectIntent{}, errors.New(fmt.Sprintf("Received empty project (%s) or session (%s)", c.projectID, c.sessionID))
 	}
