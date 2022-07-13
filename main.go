@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	dialogflow "github.com/mmuoDev/go-whatsapp/dialogflow"
 	"github.com/mmuoDev/go-whatsapp/listen"
 	"github.com/mmuoDev/go-whatsapp/twilio"
 )
@@ -38,9 +39,18 @@ func BotHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	//webhook := webhook.NewWebhook()
 
-	http.HandleFunc("/webhook", BotHandler)
+	// http.HandleFunc("/webhook", BotHandler)
 
-	http.ListenAndServe(":8080", nil)
+	// http.ListenAndServe(":8080", nil)
+
+	conn, err := dialogflow.NewConnector("weatherapp-aodc", "default", "dialogflow-creds.json", "europe-west2")
+	if err != nil {
+		log.Fatal(err)
+	}
+	text, err := conn.DetectIntentText("what is the weather in jos", "en")
+	if err != nil {
+		log.Fatal("error", err)
+	}
+	log.Fatal(text)
 }

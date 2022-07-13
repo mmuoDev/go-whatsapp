@@ -15,3 +15,10 @@ type Location struct {
 	Longitude string
 	Latitude  string
 }
+
+//DetectIntent represents an intent details 
+type DetectIntent struct {
+	FulfilmentText string 
+	IntentType string 
+	IntentDectectionConfidence int 
+}
