@@ -6,9 +6,9 @@ import (
 	"github.com/mmuoDev/go-whatsapp/events"
 )
 
+//Listener represents methods needed to be implemented to detect different types of messages
 type Listener interface {
 	Text(string) bool
-	// Intent(interface{}) (interface{}, error)
 	Attachments() (bool, events.Attachment) //image,video,documents,contacts
 	Location() (bool, events.Location)
 	GetText() string 
@@ -34,10 +34,6 @@ func (l *Listen) GetText() string {
 func (l *Listen) Text(msg string) bool {
 	return l.listen.Text(msg)
 }
-
-// func (l *Listen) Intent(interface{}) (interface{}, error) {
-// 	return nil, nil
-// }
 
 func (l *Listen) Attachments() (bool, events.Attachment) {
 	return l.listen.Attachments()

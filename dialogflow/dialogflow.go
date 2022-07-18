@@ -29,7 +29,6 @@ func NewConnector(projectID, sessionID, credsPath, region string) (*Connector, e
 	if err != nil {
 		return &Connector{}, err
 	}
-	//defer sessionClient.Close()
 	return &Connector{
 		projectID: projectID,
 		sessionID: sessionID,

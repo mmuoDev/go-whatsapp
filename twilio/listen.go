@@ -1,7 +1,6 @@
 package twilio
 
 import (
-	//"fmt"
 
 	"fmt"
 	"net/http"
@@ -10,46 +9,33 @@ import (
 	"github.com/mmuoDev/go-whatsapp/events"
 )
 
-// type TwilioProvider interface {
-// 	CreateMessage(params *openapi.CreateMessageParams) (*openapi.ApiV2010Message, error)
-// }
 
-// type Listener interface {
-// 	Text(string) bool
-// 	Intent(interface{}) (interface{}, error)
-// 	Attachments(interface{}) (interface{}, error) //image,video,documents
-// 	Location(interface{}) (interface{}, error)
-// }
-
-type Connector struct {
-	// sendTo         string
-	// twilioProvider TwilioProvider
-	//listener       Listener
+type Listener struct {
 	Payload *http.Request
 }
 
-func NewConnector(payload *http.Request) *Connector {
-	return &Connector{
+func NewListener(payload *http.Request) *Listener {
+	return &Listener{
 		Payload: payload,
 	}
 }
 
-func (c *Connector) GetText() string {
-	defer c.Payload.Body.Close()
-	c.Payload.ParseForm()
-	data := c.Payload.Form
+func (l *Listener) GetText() string {
+	defer l.Payload.Body.Close()
+	l.Payload.ParseForm()
+	data := l.Payload.Form
 	return data["Body"][0]
 }
 
-func (c *Connector) Text(msg string) bool {
-	received := c.GetText()
+func (l *Listener) Text(msg string) bool {
+	received := l.GetText()
 	return strings.EqualFold(received, msg)
 }
 
-func (c *Connector) Location() (bool, events.Location) {
-	defer c.Payload.Body.Close()
-	c.Payload.ParseForm()
-	data := c.Payload.Form
+func (l *Listener) Location() (bool, events.Location) {
+	defer l.Payload.Body.Close()
+	l.Payload.ParseForm()
+	data := l.Payload.Form
 	lats, ok := data["Latitude"]
 	if !ok {
 		return false, events.Location{}
@@ -65,11 +51,11 @@ func (c *Connector) Location() (bool, events.Location) {
 
 }
 
-func (c *Connector) Attachments() (bool, events.Attachment) {
-	defer c.Payload.Body.Close()
-	c.Payload.ParseForm()
-	data := c.Payload.Form
-	for key, value := range c.Payload.Form {
+func (l *Listener) Attachments() (bool, events.Attachment) {
+	defer l.Payload.Body.Close()
+	l.Payload.ParseForm()
+	data := l.Payload.Form
+	for key, value := range l.Payload.Form {
 		fmt.Printf("Key:%s, Value:%s\n", key, value)
 	}
 	numMedia := data["NumMedia"][0]
