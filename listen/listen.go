@@ -3,16 +3,15 @@ package listen
 import (
 	"net/http"
 
-	"github.com/mmuoDev/go-whatsapp/events"
+	"github.com/mmuoDev/go-whatsapp/whatsapp"
 )
 
 //Listener represents methods needed to be implemented to detect different types of messages
 type Listener interface {
 	Text(string) bool
-	Attachments() (bool, events.Attachment) //image,video,documents,contacts
-	Location() (bool, events.Location)
-	GetText() string 
-
+	Attachments() (bool, whatsapp.Attachment) //image,video,documents,contacts
+	Location() (bool, whatsapp.Location)
+	GetText() string
 }
 
 type Listen struct {
@@ -35,10 +34,10 @@ func (l *Listen) Text(msg string) bool {
 	return l.listen.Text(msg)
 }
 
-func (l *Listen) Attachments() (bool, events.Attachment) {
+func (l *Listen) Attachments() (bool, whatsapp.Attachment) {
 	return l.listen.Attachments()
 }
 
-func (l *Listen) Location() (bool, events.Location) {
+func (l *Listen) Location() (bool, whatsapp.Location) {
 	return l.listen.Location()
 }

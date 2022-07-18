@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	dialogflow "cloud.google.com/go/dialogflow/apiv2"
-	"github.com/mmuoDev/go-whatsapp/events"
+	events "github.com/mmuoDev/go-whatsapp/whatsapp"
 	"google.golang.org/api/option"
 	dialogflowpb "google.golang.org/genproto/googleapis/cloud/dialogflow/v2"
 )

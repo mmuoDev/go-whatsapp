@@ -1,14 +1,12 @@
 package twilio
 
 import (
-
 	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/mmuoDev/go-whatsapp/events"
+	"github.com/mmuoDev/go-whatsapp/whatsapp"
 )
-
 
 type Listener struct {
 	Payload *http.Request
@@ -32,26 +30,26 @@ func (l *Listener) Text(msg string) bool {
 	return strings.EqualFold(received, msg)
 }
 
-func (l *Listener) Location() (bool, events.Location) {
+func (l *Listener) Location() (bool, whatsapp.Location) {
 	defer l.Payload.Body.Close()
 	l.Payload.ParseForm()
 	data := l.Payload.Form
 	lats, ok := data["Latitude"]
 	if !ok {
-		return false, events.Location{}
+		return false, whatsapp.Location{}
 	}
 	lons, ok := data["Longitude"]
 	if !ok {
-		return false, events.Location{}
+		return false, whatsapp.Location{}
 	}
-	return true, events.Location{
+	return true, whatsapp.Location{
 		Longitude: lons[0],
 		Latitude:  lats[0],
 	}
 
 }
 
-func (l *Listener) Attachments() (bool, events.Attachment) {
+func (l *Listener) Attachments() (bool, whatsapp.Attachment) {
 	defer l.Payload.Body.Close()
 	l.Payload.ParseForm()
 	data := l.Payload.Form
@@ -63,39 +61,13 @@ func (l *Listener) Attachments() (bool, events.Attachment) {
 		mediaUrl := data["MediaUrl0"][0]
 		mediaType := data["MediaContentType0"][0]
 		mediaName := data["Body"][0]
-		return true, events.Attachment{
+		return true, whatsapp.Attachment{
 			MediaURL:  mediaUrl,
 			MediaName: mediaName,
 			MediaType: mediaType,
 		}
 	}
 
-	return false, events.Attachment{}
+	return false, whatsapp.Attachment{}
 }
 
-// func (c *Connector) SendText(message interface{}) error {
-// 	params := &openapi.CreateMessageParams{}
-// 	params.SetTo(c.sendTo)
-// 	params.SetFrom("+14155238886")
-// 	params.SetBody(fmt.Sprint(message))
-// 	_, err := c.twilioProvider.CreateMessage(params)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-
-// Key:MessageSid, Value:[SMf107adff086f69ad677bc216f008c51c]
-// Key:From, Value:[whatsapp:+2348067170799]
-// Key:NumSegments, Value:[1]
-// Key:WaId, Value:[2348067170799]
-// Key:AccountSid, Value:[ACb5cdd3fae18b869e67abdd16722619b6]
-// Key:To, Value:[whatsapp:+14155238886]
-// Key:NumMedia, Value:[0]
-// Key:SmsStatus, Value:[received]
-// Key:Body, Value:[HI]
-// Key:SmsSid, Value:[SMf107adff086f69ad677bc216f008c51c]
-// Key:SmsMessageSid, Value:[SMf107adff086f69ad677bc216f008c51c]
-// Key:ProfileName, Value:[Uche]
-// Key:ApiVersion, Value:[2010-04-01]
-// Key:ReferralNumMedia, Value:[0]

@@ -1,4 +1,4 @@
-package events
+package whatsapp
 
 //Attachment represents an attachment details
 //Attachment may include but not limited to contacts, videos, images, etc. 
