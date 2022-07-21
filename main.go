@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/mmuoDev/go-whatsapp/navigation"
+	"github.com/mmuoDev/go-whatsapp/menu"
 	//dialogflow "github.com/mmuoDev/go-whatsapp/dialogflow"
 	//"github.com/mmuoDev/go-whatsapp/listen"
 	//"github.com/mmuoDev/go-whatsapp/nlp"
@@ -57,9 +57,20 @@ func BotHandler(w http.ResponseWriter, r *http.Request) {
 	//Respond to events
 	
 	menuA := map[int]string{1: "hello", 2: "world"}
-	menu := navigation.Menu{}
-	menu.Set(true, 0, menuA)
-	log.Fatal(navigation.RetrieveMap())
+	menuB := map[int]string{1: "hey", 2: "bitch"}
+	menuC := map[int]string{1: "papa", 2: "benji"}
+	menu := menu.Menu{}
+	if err := menu.Set(true, 0, menuA); err != nil {
+		log.Fatal("err1", err)
+	}
+	if err := menu.Set(false, 1, menuB); err != nil {
+		log.Fatal("err2", err)
+	}
+	if err := menu.Set(false, 2, menuC); err != nil {
+		log.Fatal("err3", err)
+	}
+	
+	log.Fatal(menu.String(1))
 
 }
 
