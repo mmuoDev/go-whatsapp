@@ -60,17 +60,17 @@ func BotHandler(w http.ResponseWriter, r *http.Request) {
 	menuB := map[int]string{1: "hey", 2: "bitch"}
 	menuC := map[int]string{1: "papa", 2: "benji"}
 	menu := menu.Menu{}
-	if err := menu.Set(true, 0, menuA); err != nil {
+	if err := menu.Set(true, "0", menuA); err != nil {
 		log.Fatal("err1", err)
 	}
-	if err := menu.Set(false, 1, menuB); err != nil {
+	if err := menu.Set(false, "1", menuB); err != nil {
 		log.Fatal("err2", err)
 	}
-	if err := menu.Set(false, 2, menuC); err != nil {
+	if err := menu.Set(false, "2", menuC); err != nil {
 		log.Fatal("err3", err)
 	}
 	
-	log.Fatal(menu.String(1))
+	log.Fatal(menu.String("1"))
 
 }
 
