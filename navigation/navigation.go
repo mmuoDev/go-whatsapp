@@ -17,19 +17,19 @@ type Navigator interface {
 }
 
 type Navigate struct{
-	menu menu.Menu
+	Menu menu.Menu
 }
 
 func NewNavigator(m menu.Menu) *Navigate {
 	return &Navigate{
-		menu: m,
+		Menu: m,
 	}
 }
 
 //MainMenu navigates to the main menu
 func (n *Navigate) MainMenu() (string, error) {
 	states = []string{}
-	return n.menu.String(menu.PARENT)
+	return n.Menu.String(menu.PARENT)
 }
 
 //SubMenu navigates to a sub-menu
@@ -41,7 +41,7 @@ func (n *Navigate) SubMenu(key string) (string, error)  {
 		if previousState != "0" {
 			states = states[:len(states)-1] //remove current state
 			states = append(states, key)  //set previous state to current 
-			return n.menu.String(key)
+			return n.Menu.String(key)
 			
 		}else{
 			states = []string{}
