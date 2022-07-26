@@ -6,10 +6,16 @@ import (
 	"net/http"
 	"strconv"
 
+	//"strconv"
+	"sync"
+
 	"github.com/mmuoDev/go-whatsapp/listen"
 	"github.com/mmuoDev/go-whatsapp/menu"
+	"github.com/mmuoDev/go-whatsapp/mongo"
 	"github.com/mmuoDev/go-whatsapp/sender"
 	"github.com/mmuoDev/go-whatsapp/sessions"
+
+	//"github.com/mmuoDev/go-whatsapp/sessions"
 	"github.com/mmuoDev/go-whatsapp/twilio"
 	twilioGo "github.com/twilio/twilio-go"
 )
@@ -21,7 +27,11 @@ const (
 	USER_PHONE        = "+2348067170799"
 	CONVERSATION_TYPE = "conversation_type"
 	REQUEST_TYPE      = "request_type"
+	COLLECTION_NAME   = "sessions"
 )
+
+var onlyOnce sync.Once
+var menus menu.Menu
 
 //sendText sends a WhatsApp message
 func sendText(text string) {
@@ -46,26 +56,7 @@ func getMainMenu(menus menu.Menu) string {
 	return m
 }
 
-func BotHandler(w http.ResponseWriter, r *http.Request) {
-	//Conversation types
-	//1. welcome screen
-	//2. mare's special
-	//Request types
-	//1. Select category
-	//2. Pick from menu
-	//3. Request for quantity
-
-	//session
-	sessionData := make(map[string]interface{})
-	sess := sessions.Inmemory{
-		Memory: make(map[string]sessions.Data),
-	}
-
-	//listening
-	data := twilio.NewListener(r)
-	listener := listen.NewListener(r, data)
-
-	// Set menus
+func setMenus() menu.Menu {
 	mainMenu := map[int]string{12345: "Mare's Specials 🍰", 678910: "Smoothies 🍝"}
 	specialMenu := map[int]string{202056: "Macaroni Special @ $150 😉", 112267: "Village Rice @ $75 🍚", 346711: "Fried Plantain and Beans @ $200"}
 	menus := menu.Menu{}
@@ -75,6 +66,77 @@ func BotHandler(w http.ResponseWriter, r *http.Request) {
 	if err := menus.Set(false, "12345", specialMenu); err != nil {
 		log.Fatal(err)
 	}
+	return menus
+}
+
+type MongoConfig struct {
+	DBURI  string
+	DBName string
+}
+
+func retrieveSessionData(sessionMgr *sessions.SessManager) sessions.SessionData {
+	s := sessions.Storage{}
+	sessionMgr.RetrieveData(USER_PHONE, COLLECTION_NAME, &s)
+	return s.Data
+}
+
+func updateSessionData(sessionMgr *sessions.SessManager, data sessions.SessionData) {
+	if err := sessionMgr.UpdateSession(USER_PHONE, COLLECTION_NAME, data); err != nil {
+		log.Fatal()
+	}
+}
+
+func endSession(sessionMgr *sessions.SessManager) {
+	if err := sessionMgr.EndSession(USER_PHONE, COLLECTION_NAME); err != nil {
+		log.Fatal()
+	}
+}
+
+func BotHandler(w http.ResponseWriter, r *http.Request) {
+	//Conversation types
+	//1. welcome screen
+	//2. mare's special
+	//Request types
+	//1. Select category
+	//2. Pick from menu
+	//3. Request for quantity
+
+	//mongo
+
+	cfg := &MongoConfig{
+		DBURI:  "mongodb://localhost:27017",
+		DBName: "whatsapp",
+	}
+	mongoConnector, err := mongo.NewConnector(cfg.DBURI, cfg.DBName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	sessionMgr := sessions.NewSessManager(mongoConnector)
+
+	//session
+	sessionData := make(map[string]interface{})
+	// sess := sessions.Inmemory{
+	// 	Memory: make(map[string]sessions.Data),
+	// }
+
+	//listening
+	data := twilio.NewListener(r)
+	listener := listen.NewListener(r, data)
+
+	// Set menus
+	// mainMenu := map[int]string{12345: "Mare's Specials 🍰", 678910: "Smoothies 🍝"}
+	// specialMenu := map[int]string{202056: "Macaroni Special @ $150 😉", 112267: "Village Rice @ $75 🍚", 346711: "Fried Plantain and Beans @ $200"}
+	// menus := menu.Menu{}
+	// if err := menus.Set(true, "0", mainMenu); err != nil {
+	// 	log.Fatal(err)
+	// }
+	// if err := menus.Set(false, "12345", specialMenu); err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	onlyOnce.Do(func() {
+		menus = setMenus()
+	})
 
 	//Set navigation
 	//navigate := navigation.Navigate{Menu: menus}
@@ -88,20 +150,33 @@ func BotHandler(w http.ResponseWriter, r *http.Request) {
 		//Add a header and footer to main menu
 		h := "Welcome to Mare's Foodies Corner. See our menu options below:"
 		f := "Kindly reply with 1 or 2"
-		reply := fmt.Sprintf("%s\n\n%s\n%s", h, m, f)
-
 		//Start session
 		sessionData[CONVERSATION_TYPE] = "1"
 		sessionData[REQUEST_TYPE] = "1"
-		sess.Memory[USER_PHONE] = sessionData
+		//sess.Memory[USER_PHONE] = sessionData
+		if err := sessionMgr.StartSession(USER_PHONE, COLLECTION_NAME, sessionData); err != nil {
+			log.Fatal(err)
+		}
+		reply := fmt.Sprintf("%s\n\n%s\n%s", h, m, f)
 		sendText(reply)
 	}
 
 	//Check for other conversations if not 'hello'
 	//Maybe user has started a session
-	if sess.SessionExists(USER_PHONE) {
-		ct := sess.RetrieveData(USER_PHONE, CONVERSATION_TYPE)
-		rt := sess.RetrieveData(USER_PHONE, REQUEST_TYPE)
+	c, err := sessionMgr.SessionExists(USER_PHONE, COLLECTION_NAME)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// s := sessions.Storage{}
+	// sessionMgr.RetrieveData(USER_PHONE, collectionName, &s)
+	// dd := s.Data
+	// dd["book"] = "things fall apart"
+	// upErr := sessionMgr.UpdateSession(USER_PHONE, collectionName, dd)
+	// log.Fatal(c, upErr)
+	if c {
+		sessData := retrieveSessionData(sessionMgr)
+		ct := sessData[CONVERSATION_TYPE]
+		rt := sessData[REQUEST_TYPE]
 		res := listener.GetText()
 		switch ct {
 		case "1":
@@ -120,10 +195,12 @@ func BotHandler(w http.ResponseWriter, r *http.Request) {
 					h := "Kindly pick from our menu list"
 					f := "Pick 1,2,3 or 0 to return to the previous menu"
 					reply := fmt.Sprintf("%s\n\n%s\n%s", h, m, f)
-
-					sess.UpdateSession(USER_PHONE, CONVERSATION_TYPE, "2")
-					sess.UpdateSession(USER_PHONE, REQUEST_TYPE, "2")
+					data := retrieveSessionData(sessionMgr)
+					data[CONVERSATION_TYPE] = "2"
+					data[REQUEST_TYPE] = "2"
+					updateSessionData(sessionMgr, data)
 					sendText(reply)
+					return
 				}
 				if res == "2" {
 					text := "Our Smoothies menu will be available soon. Please check back."
@@ -145,40 +222,53 @@ func BotHandler(w http.ResponseWriter, r *http.Request) {
 					price = 200
 					item = "Fried Plantain and Beans"
 				}
-				sess.UpdateSession(USER_PHONE, "item", item)
-				sess.UpdateSession(USER_PHONE, "price", price)
-				sess.UpdateSession(USER_PHONE, REQUEST_TYPE, "3")
+				data := retrieveSessionData(sessionMgr)
+				data["item"] = item
+				data["price"] = price
+				data[REQUEST_TYPE] = "3"
+				updateSessionData(sessionMgr, data)
 				text := "How many plates do you wish to have? 😍"
 				sendText(text)
 			case "3":
 				if qty, err := strconv.Atoi(res); err == nil {
-					sess.UpdateSession(USER_PHONE, "quantity", qty)
+					data := retrieveSessionData(sessionMgr)
+					data["quantity"] = qty
+					updateSessionData(sessionMgr, data)
 					//show summary
-					price := sess.RetrieveData(USER_PHONE, "price")
+					price := data["price"]
 					p := price.(int)
-					item := sess.RetrieveData(USER_PHONE, "item")
+					item := data["item"]
 					h := "See your order summary below"
 					f := "Thank you for your order! Someone would reach out. 😋"
 					total := p * qty
 					m := fmt.Sprintf("Item: %s\nPrice:%s\nQuantity:%d\n\nTotal:%d", item, price, qty, total)
 					summary := fmt.Sprintf("%s\n%s\n\n%s", h, m, f)
+					endSession(sessionMgr)
 					sendText(summary)
-					sess.EndSession(USER_PHONE)
 				}
 				text := "You have entered an invalid value for quantity"
 				sendText(text)
 			}
 		}
+	} else {
+		h := "Ooops...I don't understand what you mean. 🙆"
+		m := "See our menu options below:"
+		f := "Kindly reply with 1 or 2"
+		mStr := getMainMenu(menus)
+		reply := fmt.Sprintf("%s\n\n%s\n%s\n%s", h, m, mStr, f)
+		//Start session
+		sessionData[CONVERSATION_TYPE] = "1"
+		sessionData[REQUEST_TYPE] = "1"
+		//sess.Memory[USER_PHONE] = sessionData
+		if err := sessionMgr.StartSession(USER_PHONE, COLLECTION_NAME, sessionData); err != nil {
+			log.Fatal(err)
+		}
+		sendText(reply)
 	}
-	h := "Ooops...I don't understand what you mean. 🙆"
-	m := "See our menu options below:"
-	f := "Kindly reply with 1 or 2"
-	mStr := getMainMenu(menus)
-	reply := fmt.Sprintf("%s\n\n%s\n%s\n%s", h, m, mStr, f)
-	sendText(reply)
+
 }
 
 func main() {
 	http.HandleFunc("/webhook", BotHandler)
-	http.ListenAndServe(":5723", nil)
+	http.ListenAndServe(":8080", nil)
 }

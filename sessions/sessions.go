@@ -13,10 +13,9 @@ package sessions
 //sessionId should be the whatsapp number
 //data to be stored should be a map of data type and it's value.
 type SessionManager interface {
-	SessionExists(sessionId string) bool
-	StartSession(sessionId string, data map[string]interface{}) error
-	UpdateSession(sessionId, key string, data interface{}) error
-	RetrieveData(sessionId, key string) interface{}
-	DeleteData(sessionId, key string) error
-	EndSession(sessionId string) error
+	StartSession(sessionId, collectionName string, data interface{}) error
+	SessionExists(sessionId, collectionName string) (bool, error)
+	RetrieveData(sessionId, collectionName string, result interface{})
+	UpdateSession(sessionId, collectionName string, data interface{}) error
+	EndSession(sessionId, collectionName string) error
 }
