@@ -140,9 +140,15 @@ func BotHandler(w http.ResponseWriter, r *http.Request) {
 
 	//Set navigation
 	//navigate := navigation.Navigate{Menu: menus}
+	//Check for other conversations if not 'hello'
+	//Maybe user has started a session
+	c, err := sessionMgr.SessionExists(USER_PHONE, COLLECTION_NAME)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	check := listener.Text("hello")
-	if check {
+	if check && !c {
 		m, err := menus.String(menu.PARENT)
 		if err != nil {
 			log.Fatal(err)
@@ -159,14 +165,10 @@ func BotHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		reply := fmt.Sprintf("%s\n\n%s\n%s", h, m, f)
 		sendText(reply)
+		return 
 	}
 
-	//Check for other conversations if not 'hello'
-	//Maybe user has started a session
-	c, err := sessionMgr.SessionExists(USER_PHONE, COLLECTION_NAME)
-	if err != nil {
-		log.Fatal(err)
-	}
+	
 	// s := sessions.Storage{}
 	// sessionMgr.RetrieveData(USER_PHONE, collectionName, &s)
 	// dd := s.Data
@@ -192,9 +194,9 @@ func BotHandler(w http.ResponseWriter, r *http.Request) {
 					if err != nil {
 						log.Fatal(err)
 					}
-					h := "Kindly pick from our menu list"
+					h := "Kindly pick from our menu list 🛒"
 					f := "Pick 1,2,3 or 0 to return to the previous menu"
-					reply := fmt.Sprintf("%s\n\n%s\n%s", h, m, f)
+					reply := fmt.Sprintf("%s\n\n%s\n\n%s", h, m, f)
 					data := retrieveSessionData(sessionMgr)
 					data[CONVERSATION_TYPE] = "2"
 					data[REQUEST_TYPE] = "2"
@@ -214,20 +216,20 @@ func BotHandler(w http.ResponseWriter, r *http.Request) {
 				var item string
 				if res == "1" {
 					price = 150
-					item = "Macaroni Special"
+					item = "Village Rice"
 				} else if res == "2" {
 					price = 75
-					item = "Village Rice"
+					item = "Fried Plantain and Beans"
 				} else if res == "3" {
 					price = 200
-					item = "Fried Plantain and Beans"
+					item = "Macaroni Special"
 				}
 				data := retrieveSessionData(sessionMgr)
 				data["item"] = item
 				data["price"] = price
 				data[REQUEST_TYPE] = "3"
 				updateSessionData(sessionMgr, data)
-				text := "How many plates do you wish to have? 😍"
+				text := fmt.Sprintf("How many plates of *%s* do you wish to have? 😍", item)
 				sendText(text)
 			case "3":
 				if qty, err := strconv.Atoi(res); err == nil {
@@ -236,15 +238,16 @@ func BotHandler(w http.ResponseWriter, r *http.Request) {
 					updateSessionData(sessionMgr, data)
 					//show summary
 					price := data["price"]
-					p := price.(int)
+					p := price.(int32)
 					item := data["item"]
-					h := "See your order summary below"
-					f := "Thank you for your order! Someone would reach out. 😋"
-					total := p * qty
-					m := fmt.Sprintf("Item: %s\nPrice:%s\nQuantity:%d\n\nTotal:%d", item, price, qty, total)
-					summary := fmt.Sprintf("%s\n%s\n\n%s", h, m, f)
+					h := "See your order summary below 👜"
+					f := "Thank you for your order! Someone would reach out. 🤙"
+					total := p * int32(qty)
+					m := fmt.Sprintf("Item: %s\nPrice:$%d\nQuantity:%d\nTotal:$%d", item, price, qty, total)
+					summary := fmt.Sprintf("%s\n\n%s\n\n%s", h, m, f)
 					endSession(sessionMgr)
 					sendText(summary)
+					return 
 				}
 				text := "You have entered an invalid value for quantity"
 				sendText(text)
