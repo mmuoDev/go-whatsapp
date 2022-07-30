@@ -9,6 +9,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+const (
+	COLLECTION_NAME = "sessions"
+)
+
 //Connector wraps connection to mongoDB
 type Connector struct {
 	client *mongo.Client
@@ -28,8 +32,8 @@ func NewConnector(dbURI, dbName string) (*Connector, error) {
 }
 
 //CreateOne adds a document to a collection
-func (c *Connector) StartSession(sessionId, collectionName string, document interface{}) error {
-	col := c.client.Database(c.dbName).Collection(collectionName)
+func (c *Connector) StartSession(sessionId string, document interface{}) error {
+	col := c.client.Database(c.dbName).Collection(COLLECTION_NAME)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	_, err := col.InsertOne(ctx, document)
@@ -40,16 +44,16 @@ func (c *Connector) StartSession(sessionId, collectionName string, document inte
 	return nil
 }
 
-func (c *Connector) RetrieveData(sessionId, collectionName string, result interface{}) {
-	col := c.client.Database(c.dbName).Collection(collectionName)
+func (c *Connector) RetrieveData(sessionId string, result interface{}) {
+	col := c.client.Database(c.dbName).Collection(COLLECTION_NAME)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	filter := bson.D{{"sessionId", sessionId}}
 	col.FindOne(ctx, filter).Decode(result)
 }
 
-func (c *Connector) EndSession(sessionId, collectionName string) error {
-	col := c.client.Database(c.dbName).Collection(collectionName)
+func (c *Connector) EndSession(sessionId string) error {
+	col := c.client.Database(c.dbName).Collection(COLLECTION_NAME)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	filter := bson.D{{"sessionId", sessionId}}
@@ -57,8 +61,8 @@ func (c *Connector) EndSession(sessionId, collectionName string) error {
 	return err
 }
 
-func (c *Connector) UpdateSession(sessionId, collectionName string, document interface{}) error {
-	col := c.client.Database(c.dbName).Collection(collectionName)
+func (c *Connector) UpdateSession(sessionId string, document interface{}) error {
+	col := c.client.Database(c.dbName).Collection(COLLECTION_NAME)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	filter := bson.D{{"sessionId", sessionId}}
@@ -94,9 +98,9 @@ func (c *Connector) UpdateSession(sessionId, collectionName string, document int
 // }
 
 //CountDocuments returns count of filtered documents
-func (c *Connector) SessionExists(sessionId, collectionName string) (bool, error) {
+func (c *Connector) SessionExists(sessionId string) (bool, error) {
 	filter := bson.D{{"sessionId", sessionId}}
-	col := c.client.Database(c.dbName).Collection(collectionName)
+	col := c.client.Database(c.dbName).Collection(COLLECTION_NAME)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	count, err := col.CountDocuments(ctx, filter)

@@ -14,7 +14,8 @@ Reply with a number, emoji or WORD IN BOLD to explore one of these topics:
 4 🦠️ COVID-19 info and advice
 5 🔗 CONNECT and share
 ***/
-//The menu here are the options (1-5)
+
+//TODO:: Using a map distorts the order of the menu items. 
 
 import (
 	"errors"
@@ -33,14 +34,24 @@ const (
 type menuItems map[int]string
 
 //menus represents a type for collection of all menus for a chatbot
-type menuCollection map[string]menuItems
+type menuCollection map[string]menu
+
+type Item struct {
+	Key int 
+	Title string
+}
+type menu struct {
+	items []Item
+	header string
+	footer string
+}
 
 var menus menuCollection
 
 //Menufier defines methods to set, retrieve and show a menu.
 //'parent' specifies if it is the main menu (welcome screen). Note that there can only be one main menu.
 type Menufier interface {
-	Set(parent bool, key string, items menuItems) error
+	Set(parent bool, items []Item, key, header, footer string) error
 	Get(key string) (menuItems, error)
 	String(key string) (string, error)
 	GetMenuCollection() menuCollection
@@ -54,7 +65,7 @@ func (m *Menu) GetMenuCollection() menuCollection {
 }
 
 //Set adds a menu to the chatbot
-func (m *Menu) Set(parent bool, key string, items menuItems) error {
+func (m *Menu) Set(parent bool, items []Item, key, header, footer string) error {
 	if len(menus) == 0 {
 		menus = make(menuCollection)
 	}
@@ -70,35 +81,38 @@ func (m *Menu) Set(parent bool, key string, items menuItems) error {
 		}
 	}
 	if parent == true {
-		menus[PARENT] = items
+		menus[PARENT] = menu{items: items, header: header, footer: footer}
 		return nil
 	}
-	menus[fmt.Sprint(key)] = items
+	menus[fmt.Sprint(key)] = menu{items: items, header: header, footer: footer}
 	return nil
 }
 
 //Get retrieves a menu
-func (m *Menu) Get(ID string) (menuItems, error) {
-	if items, ok := menus[ID]; ok {
-		return items, nil
+func (m *Menu) Get(ID string) (menu, error) {
+	if menu, ok := menus[ID]; ok {
+		return menu, nil
 	}
-	return menuItems{}, fmt.Errorf("No menu items found for specified key=%s", ID)
+	return menu{}, fmt.Errorf("No menu found for specified key=%s", ID)
 }
 
 //String returns the string representation for a menu
 func (m *Menu) String(key string) (string, error) {
-	menuStr := ""
-	items, err := m.Get(key)
+	menu, err := m.Get(key)
+	itemStr := ""
 	if err != nil {
-		return menuStr, err
+		return itemStr, err
 	}
-	i := 0
+	items := menu.items
+	header := menu.header
+	footer := menu.footer
+	//i := 0
 	for _, v := range items {
-		i++
-		menuStr += fmt.Sprintf("%d. %s \n", i, v)
+		//i++
+		itemStr += fmt.Sprintf("%s \n", v.Title)
 	}
 	if fmt.Sprint(key) != PARENT {
-		menuStr += fmt.Sprintf("0. %s", PREVIOUS_MENU) //See navigation package.
+		itemStr += fmt.Sprintf("0. %s", PREVIOUS_MENU) //See navigation package.
 	}
-	return menuStr, nil
+	return fmt.Sprintf("%s\n%s\n%s", header, itemStr, footer), nil
 }
