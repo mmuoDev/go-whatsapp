@@ -6,7 +6,7 @@ import (
 	"github.com/mmuoDev/go-whatsapp/menu"
 )
 
-// Adding navigation allows you move between menus.
+// Adding navigation allows you move amongst menus.
 // Whilst users can go from "menu A" to "menu B", want them to be able to move back too.
 // For sub-menus, we should have a "0. Previous Menu" that allows users return to previous menu when they enter "0".
 // We don’t need "0. Previous Menu" at the "main menu" (welcome screen)
@@ -28,13 +28,7 @@ func NewNavigator(m menu.Menu) *Navigate {
 	}
 }
 
-//MainMenu navigates to the main menu
-// func (n *Navigate) MainMenu() (string, error) {
-// 	//states = []string{}
-// 	//n.session.StartSession()
-// 	return n.Menu.String(menu.PARENT)
-// }
-
+//PreviousMenu returns the previous menu
 func (n *Navigate) PreviousMenu(states string, currentState int32) (string, int, string) {
 	ss := strings.Split(states, ",")
 	if len(ss) == 0 {
@@ -49,24 +43,7 @@ func (n *Navigate) PreviousMenu(states string, currentState int32) (string, int,
 	return menu.PARENT, 0, states
 }
 
-//NextMenu navigates to the next menu
+//NextMenu returns a menu
 func (n *Navigate) NextMenu(key string) (string, error) {
-	// if len(states) > 1 {
-	// 	count := len(states)
-	// 	previousIndex := count - 2
-	// 	previousState := states[previousIndex]
-	// 	if previousState != "0" {
-	// 		states = states[:len(states)-1] //remove current state
-	// 		states = append(states, key)    //set previous state to current
-	// 		return n.Menu.String(key)
-
-	// 	} else {
-	// 		states = []string{}
-	// 		stateId := "0"
-	// 		states = append(states, stateId)
-	// 		return n.MainMenu()
-	// 	}
-	// }
-	// return n.MainMenu()
 	return n.Menu.String(key)
 }

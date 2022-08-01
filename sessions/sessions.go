@@ -5,12 +5,11 @@ package sessions
 // persist in the session as the user continually interacts with your chatbot.
 // For example, if a user sends a message containing his name and you don't store that in a session, by the
 // time you are sending a reply, everything in the session is lost!
-// So what’s the solution? Database!
-// https://medium.com/@mmuoDev/how-to-manage-session-variables-while-building-a-whatsapp-facebook-chatbot-fa20131c8c95
+// Reference - https://medium.com/@mmuoDev/how-to-manage-session-variables-while-building-a-whatsapp-facebook-chatbot-fa20131c8c95
 
-//SessionManager represents methods needed for database systems e.g. Mongo, MySQL needs to implement
-//in order to manage sessions for a chatbot
-//sessionId should be the whatsapp number
+//SessionManager represents methods database systems e.g. Mongo, MySQL need to implement
+//in order to manage sessions for a chatbot.
+//sessionId should be the user's whatsapp number
 //data to be stored should be a map of data type and it's value.
 type SessionManager interface {
 	StartSession(sessionId string, data interface{}) error

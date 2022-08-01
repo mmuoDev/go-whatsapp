@@ -6,12 +6,12 @@ import (
 	"github.com/mmuoDev/go-whatsapp/whatsapp"
 )
 
-//Listener represents methods needed to be implemented to detect different types of messages
 type Listener interface {
 	Text(string) bool
 	Attachments() (bool, whatsapp.Attachment) //image,video,documents,contacts
 	Location() (bool, whatsapp.Location)
 	GetText() string
+	GetPhoneNumber() string
 }
 
 type Listen struct {
@@ -28,6 +28,10 @@ func NewListener(r *http.Request, listener Listener) *Listen {
 
 func (l *Listen) GetText() string {
 	return l.listen.GetText()
+}
+
+func (l *Listen) GetPhoneNumber() string {
+	return l.listen.GetPhoneNumber()
 }
 
 func (l *Listen) Text(msg string) bool {

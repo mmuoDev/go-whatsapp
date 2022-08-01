@@ -25,6 +25,13 @@ func (l *Listener) GetText() string {
 	return data["Body"][0]
 }
 
+func (l *Listener) GetPhoneNumber() string {
+	defer l.Payload.Body.Close()
+	l.Payload.ParseForm()
+	data := l.Payload.Form
+	return data["From"][0]
+}
+
 func (l *Listener) Text(msg string) bool {
 	received := l.GetText()
 	return strings.EqualFold(received, msg)
@@ -67,7 +74,5 @@ func (l *Listener) Attachments() (bool, whatsapp.Attachment) {
 			MediaType: mediaType,
 		}
 	}
-
 	return false, whatsapp.Attachment{}
 }
-

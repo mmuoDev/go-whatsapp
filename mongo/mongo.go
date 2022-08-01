@@ -31,7 +31,6 @@ func NewConnector(dbURI, dbName string) (*Connector, error) {
 	}, nil
 }
 
-//CreateOne adds a document to a collection
 func (c *Connector) StartSession(sessionId string, document interface{}) error {
 	col := c.client.Database(c.dbName).Collection(COLLECTION_NAME)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -40,7 +39,6 @@ func (c *Connector) StartSession(sessionId string, document interface{}) error {
 	if err != nil {
 		return err
 	}
-	//id := res.InsertedID.(primitive.ObjectID).String()
 	return nil
 }
 
@@ -76,28 +74,6 @@ func (c *Connector) UpdateSession(sessionId string, document interface{}) error 
 	return nil
 }
 
-// func (c *Connector) FindOne(collectionName string, ID string, r interface{}, opts ...*options.FindOneOptions) error {
-// 	col := c.client.Database(c.dbName).Collection(collectionName)
-// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-// 	defer cancel()
-// 	filter := bson.D{{"id", string(ID)}}
-// 	return col.FindOne(ctx, filter, opts...).Decode(r)
-// }
-
-// //Update updates existing document in the database
-// func (c *Connector) Update(ID string, collectionName string, changes interface{}) error {
-// 	col := c.client.Database(c.dbName).Collection(collectionName)
-// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-// 	defer cancel()
-// 	filter := bson.D{{"id", string(ID)}}
-// 	update := bson.D{
-// 		bson.E{"$set", changes},
-// 	}
-// 	_, err2 := col.UpdateOne(ctx, filter, update)
-// 	return err2
-// }
-
-//CountDocuments returns count of filtered documents
 func (c *Connector) SessionExists(sessionId string) (bool, error) {
 	filter := bson.D{{"sessionId", sessionId}}
 	col := c.client.Database(c.dbName).Collection(COLLECTION_NAME)
