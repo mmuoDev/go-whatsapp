@@ -14,7 +14,6 @@ import (
 
 const (
 	CHATBOT_NUMBER = "whatsapp:+14155238886"
-	USER_PHONE     = "+2348067170799"
 )
 
 func sendText(text, phoneNumber string) {
