@@ -2,12 +2,14 @@
 
 Build a WhatsApp chatbot using Go. This package makes it easy to use NLP (Natural Language Processing), navigation, menus and sessions on a WhatsApp chatbot. 
 
-You can easily plug in your WhatsApp Business API either directly from Facebook or third-party platforms like Twilio,Clickatel,etc. This package provides an implementation for Twilio. The code snippets uses Twilio's WhatsApp.
+You can easily plug in your WhatsApp Business API either directly from Facebook or third-party platforms like Twilio,Clickatel,etc. 
 
 https://user-images.githubusercontent.com/16281845/181497645-f984def0-1be1-4d98-acb1-902b8b8e2a6e.MP4
 
+This package provides an implementation for Twilio. The code snippets uses Twilio's WhatsApp.
+
 ## **Hearing** 
-You can listen to different types of messages.  
+You can listen for different types of messages.  
 ### Listen for Text
 ```
 twilio := twilio.NewListener(r)
