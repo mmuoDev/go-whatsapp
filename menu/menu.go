@@ -1,9 +1,10 @@
+/**
+The package handles menu specifications for a chatbot.
+You may want to use menus so your users can easily navigate your chatbot. Menus are usually better compared
+to making your chatbot open ended. A menu allows you present your users with set of options they can easily pick from.
+Here is an example from World Health Organization's WhatsApp Chatbot
+**/
 package menu
-
-//The package handles menu specifications for a chatbot.
-//You may want to use menus so your users can easily navigate your chatbot. Menus are usually better compared
-//to making your chatbot open ended. A menu allows you present your users with set of options they can easily pick from.
-//Here is an example from World Health Organization's WhatsApp Chatbot
 
 import (
 	"errors"
@@ -11,8 +12,7 @@ import (
 )
 
 const (
-	PARENT = "parent" //default key for "main menu". Main menu is more like your welcome screen.
-	//You can change this value provided it does not conflicts with other menu keys.
+	PARENT = "parent" //default key for "main menu". Main menu is more like your welcome screen. You can change this value provided it does not conflicts with other menu keys.
 	PREVIOUS_MENU = "Previous Menu"
 )
 
@@ -50,14 +50,14 @@ func (m *Menu) Set(parent bool, items []Item, key, header, footer string) error 
 		menus = make(menuCollection)
 	}
 	if len(items) == 0 {
-		return errors.New("No menu items found")
+		return errors.New("no menu items found")
 	}
 	if parent == false && key == "" {
-		return errors.New("You must either set a main menu or provide menu key")
+		return errors.New("you must either set a main menu or provide menu key")
 	}
 	if len(menus) > 0 {
 		if m, ok := menus[key]; ok {
-			return fmt.Errorf("This key=%d already has a submenu=%v assigned to it", key, m)
+			return fmt.Errorf("this key=%s already has a submenu=%v assigned to it", key, m)
 		}
 	}
 	if parent == true {
