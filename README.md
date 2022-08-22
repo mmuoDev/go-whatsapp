@@ -11,19 +11,19 @@ This package provides an implementation for Twilio. The code snippets uses Twili
 ## **Listening** 
 You can listen for different types of messages.  
 ### Listen for Text
-```
+```go
 twilio := twilio.NewListener(r)
 listener := listen.NewListener(r, twilio)
 text := listener.GetText()
 ```
 ### Listen for Location
-```
+```go
 twilio := twilio.NewListener(r)
 listener := listen.NewListener(r, twilio)
 f, location := listener.Location()
 ```
 ### Listen for Attachments
-```
+```go
 twilio := twilio.NewListener(r)
 listener := listen.NewListener(r, twilio)
 f, attachments := listener.Attachments()
@@ -32,7 +32,7 @@ f, attachments := listener.Attachments()
 ## **Sending**
 
 ### Send Text
-```
+```go
 client := twilioGo.NewRestClientWithParams(twilioGo.ClientParams{
 		Username: "",
 		Password: "",
@@ -49,7 +49,7 @@ Natural language processing (NLP) is the ability of a computer program to unders
 This package provides an implementation for [DialogFlow](https://cloud.google.com/dialogflow/docs)
 
 ### Detect Intect of a WhatsApp message
-```
+```go
 conn, err := dialogflow.NewConnector("", "default", "xxxxx-creds.json", "europe-west2")
 if err != nil {
 	log.Fatal(err)
@@ -66,7 +66,7 @@ if err != nil {
 
 ## **Sessions**
 ### Add data to sessions using `Mongo` as the driver
-```
+```go
 cfg := &MongoConfig{
 	DBURI:  "mongodb://localhost:27017",
 	DBName: "test",
@@ -85,7 +85,7 @@ if err := sessionMgr.StartSession("", sessionData); err != nil {
 
 ## **Menus**
 ### Add a menu
-```
+```go
 menus := menu.Menu{}
 itemA := menu.Item{Key: 12345, Title: "1. Mare's Specials 🍰"}
 itemB := menu.Item{Key: 678910, Title: "2. Smoothies 🍝"}
@@ -100,7 +100,7 @@ if err := menus.Set(true, menuA, "0", header, footer); err != nil {
 
 ## **Navigation**
 ### Navigate to a menu
-```
+```go
 navigate := navigation.NewNavigator(menus)
 m, err := navigate.NextMenu("menu key here")
 if err != nil {
@@ -110,4 +110,3 @@ if err != nil {
 
 ## **Examples**
 `/examples` provides examples on how to use this package. 
-
