@@ -1,6 +1,6 @@
 # **Go-WhatsApp**
 
-Build a WhatsApp chatbot using Go. This package makes it easy to use NLP (Natural Language Processing), navigation, menus and sessions on a WhatsApp chatbot. 
+Build a WhatsApp chatbot using Go. This package makes it easy to use NLP (Natural Language Processing), navigation, menus and sessions in a WhatsApp chatbot. 
 
 You can easily plugin your WhatsApp Business API either directly from Facebook or third-party platforms like Twilio,Clickatel,etc. 
 
@@ -84,7 +84,7 @@ if err := sessionMgr.StartSession("", sessionData); err != nil {
 ```
 
 ## **Menus**
-### Add a menu
+### Set a menu
 ```go
 menus := menu.Menu{}
 itemA := menu.Item{Key: 12345, Title: "1. Mare's Specials 🍰"}
